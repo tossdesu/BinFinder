@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">Bank Card Info</string>
+    <string name="app_name">BIN Finder</string>
+    <string name="history_query_title">Ранее вы искали</string>
+    <string name="bank_info_title">Банк</string>
+    <string name="country_info_title">Страна</string>
+    <string name="card_info_title">Карта</string>
 </resources>
