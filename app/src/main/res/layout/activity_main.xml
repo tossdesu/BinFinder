@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/grey_100"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".presentation.MainActivity">
 
     <androidx.appcompat.widget.SearchView
         android:id="@+id/svBinSearch"
