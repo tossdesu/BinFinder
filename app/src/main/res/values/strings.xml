@@ -1,7 +1,24 @@
 <resources>
     <string name="app_name">BIN Finder</string>
+
+    <!-- MainActivity -->
     <string name="history_query_title">Ранее вы искали</string>
+    <string name="nothing_found">По вашему запросу ничего не найдено</string>
+    <string name="bin_validate_error">Для поиска нужно ввести 6 первых цифр номера вашей карты</string>
+    <string name="no_internet_connection">Проверьте подключение к интернету</string>
+    <string name="reload_button">Обновить</string>
+
+    <!-- CardInfoActivity -->
+    <string name="card_info_activity_label">Информация о карте</string>
     <string name="bank_info_title">Банк</string>
     <string name="country_info_title">Страна</string>
-    <string name="card_info_title">Карта</string>
+    <string name="card_info_title">Дополнительно</string>
+    <string name="search_result_bin">Результаты поиска по Bin</string>
+    <string name="card_scheme_network">SCHEME / NETWORK:</string>
+    <string name="card_type">TYPE:</string>
+    <string name="card_brand">BRAND:</string>
+    <string name="card_prepaid">PREPAID:</string>
+    <string name="card_number_length">CARD NUMBER LENGTH:</string>
+    <string name="card_number_luhn">CARD NUMBER LUHN:</string>
+
 </resources>

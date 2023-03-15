@@ -9,7 +9,7 @@
     tools:context=".presentation.MainActivity">
 
     <androidx.appcompat.widget.SearchView
-        android:id="@+id/svBinSearch"
+        android:id="@+id/searchView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -17,17 +17,26 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/search_view_bg"
-        android:inputType="number"
         android:focusableInTouchMode="true"
+        android:inputType="number"
         app:iconifiedByDefault="false"
         app:queryBackground="@null"
-        app:queryHint="Введите BIN" />
+        app:queryHint="Введите BIN карты" />
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <ImageView
+            android:id="@+id/ivSearchHelp"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            app:srcCompat="@drawable/find_bin_num_explain" />
+
         <LinearLayout
+            android:id="@+id/llHistoryBlock"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="16dp"
@@ -47,13 +56,14 @@
                 android:layout_height="match_parent" />
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="350dp"
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:adjustViewBounds="true"
-            app:srcCompat="@drawable/find_bin_num_explain" />
+            android:visibility="gone" />
 
     </FrameLayout>
 
