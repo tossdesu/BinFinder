@@ -1,6 +1,7 @@
 package com.tossdesu.bankcardinfo.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog

@@ -5,7 +5,7 @@ import com.tossdesu.bankcardinfo.domain.entity.CardBin
 
 class CardBinDiffCallback : DiffUtil.ItemCallback<CardBin>() {
     override fun areItemsTheSame(oldItem: CardBin, newItem: CardBin): Boolean {
-        return oldItem.bin == newItem.bin
+        return oldItem.id == newItem.id
     }
 
     override fun areContentsTheSame(oldItem: CardBin, newItem: CardBin): Boolean {

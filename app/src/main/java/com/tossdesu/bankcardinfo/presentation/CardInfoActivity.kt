@@ -2,9 +2,11 @@ package com.tossdesu.bankcardinfo.presentation
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.tossdesu.bankcardinfo.R
 import com.tossdesu.bankcardinfo.databinding.ActivityBinInfoBinding
 import com.tossdesu.bankcardinfo.domain.entity.CardInfo
@@ -58,12 +60,15 @@ class CardInfoActivity : AppCompatActivity() {
             //Bank
             tvBankName.text = cardInfo.bankName ?: NO_INFO
             tvUrl.text = cardInfo.bankUrl ?: NO_INFO
+            cardInfo.bankUrl?.let { setBankUrl(it) }
             tvPhone.text = cardInfo.bankPhone ?: NO_INFO
+            cardInfo.bankPhone?.let { setBankPhone(it) }
             tvCity.text = cardInfo.bankCity ?: NO_INFO
             //Country
             tvCountryAlpha2.text = cardInfo.countryAlpha2
             tvCountry.text = cardInfo.countryName
             tvCoordinates.text = getCoordinatesString()
+            setBankCoordinates(cardInfo.latitude, cardInfo.longitude)
             tvCurrency.text = cardInfo.currency
             //Card
             tvScheme.text = cardInfo.cardScheme
@@ -77,6 +82,39 @@ class CardInfoActivity : AppCompatActivity() {
 
     private fun getCoordinatesString() =
         "(latitude: ${cardInfo.latitude}, longitude: ${cardInfo.longitude})"
+
+    private fun setBankPhone(phoneNumber: String) {
+        with(binding.tvPhone) {
+            setTextColor(ContextCompat.getColor(this@CardInfoActivity, R.color.blue_500))
+            setOnClickListener {
+                val phoneIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
+                startActivity(phoneIntent)
+            }
+        }
+    }
+
+    private fun setBankUrl(url: String) {
+        with(binding.tvUrl) {
+            setTextColor(ContextCompat.getColor(this@CardInfoActivity, R.color.blue_500))
+            setOnClickListener {
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://$url"))
+                startActivity(browserIntent)
+            }
+        }
+    }
+
+    private fun setBankCoordinates(latitude: Float, longitude: Float) {
+        with(binding.tvCoordinates) {
+            setTextColor(ContextCompat.getColor(this@CardInfoActivity, R.color.blue_500))
+            setOnClickListener {
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("geo:$latitude,$longitude")
+                )
+                startActivity(intent)
+            }
+        }
+    }
 
     companion object {
 

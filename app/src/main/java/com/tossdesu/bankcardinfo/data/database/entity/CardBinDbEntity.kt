@@ -4,6 +4,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.tossdesu.bankcardinfo.data.database.entity.CardBinDbEntity.Companion.NAME
 import com.tossdesu.bankcardinfo.domain.entity.CardBin
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 
 /**
  * Card DB Entity
@@ -29,6 +31,7 @@ data class CardBinDbEntity(
      * Convert this entity into in-app [CardBin] instance.
      */
     fun toCardBin() = CardBin(
+        id = id,
         bin = bin
     )
 
@@ -41,7 +44,7 @@ data class CardBinDbEntity(
          * Convert this entity into DB [CardBinDbEntity] instance.
          */
         fun fromCardBin(cardBin: CardBin) = CardBinDbEntity(
-            id = 0,
+            id = cardBin.id,
             bin = cardBin.bin
         )
     }
