@@ -1,7 +1,8 @@
 package com.tossdesu.bankcardinfo.domain
 
-import com.tossdesu.bankcardinfo.domain.entity.CardInfo
+import androidx.lifecycle.LiveData
 import com.tossdesu.bankcardinfo.domain.entity.CardBin
+import com.tossdesu.bankcardinfo.domain.entity.CardInfo
 
 interface CardsRepository {
 
@@ -13,12 +14,12 @@ interface CardsRepository {
 
     /**
      * Get all cardInfo bin numbers searched before from DB
-     * @return list of [CardBin] objects
+     * @return livedata list of [CardBin] objects
      */
-//    suspend fun getSearchHistoryUseCase(): List<CardBin>
+    fun getSearchHistoryUseCase(): LiveData<List<CardBin>>
 
     /**
      * Put searched cardInfo bin number as [CardBin] object into DB
      */
-//    suspend fun saveBinUseCase(cardBin: CardBin)
+    suspend fun saveBinUseCase(cardBin: CardBin)
 }

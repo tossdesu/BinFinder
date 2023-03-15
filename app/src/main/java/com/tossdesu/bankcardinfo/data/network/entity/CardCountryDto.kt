@@ -4,6 +4,6 @@ data class CardCountryDto(
     val alpha2: String,
     val name: String,
     val currency: String,
-    val latitude: Int,
-    val longitude: Int
+    val latitude: Float,
+    val longitude: Float
 )

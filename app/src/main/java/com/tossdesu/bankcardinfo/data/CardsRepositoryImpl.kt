@@ -1,5 +1,9 @@
 package com.tossdesu.bankcardinfo.data
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Transformations
+import com.tossdesu.bankcardinfo.data.database.CardBinsDao
+import com.tossdesu.bankcardinfo.data.database.entity.CardBinDbEntity
 import com.tossdesu.bankcardinfo.data.network.ApiService
 import com.tossdesu.bankcardinfo.data.network.SafeApiCall
 import com.tossdesu.bankcardinfo.domain.CardsRepository
@@ -10,6 +14,7 @@ import javax.inject.Inject
 
 class CardsRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
+    private val cardBinsDao: CardBinsDao,
     private val safeApiCall: SafeApiCall
 ) : CardsRepository {
 
@@ -25,14 +30,15 @@ class CardsRepositoryImpl @Inject constructor(
      * Get all cardInfo bin numbers searched before from DB
      * @return list of [CardBin] objects
      */
-//    override suspend fun getSearchHistoryUseCase(): List<CardBin> {
-//        TODO("Not yet implemented")
-//    }
+    override fun getSearchHistoryUseCase(): LiveData<List<CardBin>> =
+        Transformations.map(cardBinsDao.getCardBins()) { cardBinDbEntities ->
+            cardBinDbEntities.map { it.toCardBin() }
+        }
 
     /**
      * Put searched cardInfo bin number as [CardBin] object into DB
      */
-//    override suspend fun saveBinUseCase(cardBin: CardBin) {
-//        TODO("Not yet implemented")
-//    }
+    override suspend fun saveBinUseCase(cardBin: CardBin) {
+        cardBinsDao.saveCardBin(CardBinDbEntity.fromCardBin(cardBin))
+    }
 }

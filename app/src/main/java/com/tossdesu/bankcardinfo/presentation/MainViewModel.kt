@@ -1,25 +1,50 @@
 package com.tossdesu.bankcardinfo.presentation
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.tossdesu.bankcardinfo.domain.Resource
 import com.tossdesu.bankcardinfo.domain.Resource.Exception.Cause.*
+import com.tossdesu.bankcardinfo.domain.entity.CardBin
 import com.tossdesu.bankcardinfo.domain.entity.CardInfo
 import com.tossdesu.bankcardinfo.domain.usecase.GetCardUseCase
+import com.tossdesu.bankcardinfo.domain.usecase.GetSearchHistoryUseCase
+import com.tossdesu.bankcardinfo.domain.usecase.SaveBinUseCase
 import com.tossdesu.bankcardinfo.domain.usecase.ValidateBinNumberUseCase
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(
     private val getCardUseCase: GetCardUseCase,
+    private val saveBinUseCase: SaveBinUseCase,
+    private val getSearchHistoryUseCase: GetSearchHistoryUseCase,
     private val validateBinNumberUseCase: ValidateBinNumberUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableLiveData<MainActivityUiState>()
     val uiState: LiveData<MainActivityUiState>
         get() = _uiState
+
+    private val binsHistory by lazy {
+        getSearchHistoryUseCase()
+    }
+
+    private val binSearchUpdated by lazy {
+        Observer<List<CardBin>> {
+            _uiState.value = MainActivityUiState.BinSearchHistoryData(it)
+        }
+    }
+
+    init {
+        getHistory()
+    }
+
+    private fun getHistory() {
+        binsHistory.observeForever(binSearchUpdated)
+    }
+
+    override fun onCleared() {
+        binsHistory.removeObserver(binSearchUpdated)
+        super.onCleared()
+    }
 
     fun getCardInfo(binString: String?) {
         viewModelScope.launch {
@@ -28,6 +53,9 @@ class MainViewModel @Inject constructor(
                 _uiState.value = MainActivityUiState.ValidateError
             } else {
                 _uiState.value = MainActivityUiState.Loading
+
+                saveCardBin(CardBin(bin = binNumber.toString()))
+
                 val response = getCardUseCase(binNumber)
                 handleResponse(response)
             }
@@ -37,6 +65,7 @@ class MainViewModel @Inject constructor(
     private fun handleResponse(resource: Resource<CardInfo>) {
         if (resource is Resource.Success) {
             _uiState.value = MainActivityUiState.CardData(resource.data)
+
         } else if (resource is Resource.Exception) {
             when(resource.cause) {
                 is NoConnection -> {
@@ -61,5 +90,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-
+    private suspend fun saveCardBin(bin: CardBin) {
+        saveBinUseCase(bin)
+    }
 }

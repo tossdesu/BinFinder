@@ -1,6 +1,9 @@
 package com.tossdesu.bankcardinfo.di
 
+import android.app.Application
 import com.tossdesu.bankcardinfo.data.CardsRepositoryImpl
+import com.tossdesu.bankcardinfo.data.database.AppDatabase
+import com.tossdesu.bankcardinfo.data.database.CardBinsDao
 import com.tossdesu.bankcardinfo.data.network.ApiFactory
 import com.tossdesu.bankcardinfo.data.network.ApiService
 import com.tossdesu.bankcardinfo.domain.CardsRepository
@@ -17,12 +20,12 @@ interface DataModule {
 
     companion object {
 
-//        @Provides
-//        fun provideAccountDao(
-//            application: Application
-//        ): RecipesDao {
-//            return AppDatabase.getInstance(application).recipesDao()
-//        }
+        @Provides
+        fun provideCardBinsDao(
+            application: Application
+        ): CardBinsDao {
+            return AppDatabase.getInstance(application).cardBinsDao()
+        }
 
         @Provides
         fun provideApiService(): ApiService {

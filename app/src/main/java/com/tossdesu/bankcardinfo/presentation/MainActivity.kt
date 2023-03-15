@@ -1,7 +1,6 @@
 package com.tossdesu.bankcardinfo.presentation
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
@@ -13,12 +12,16 @@ import com.tossdesu.bankcardinfo.R
 import com.tossdesu.bankcardinfo.databinding.ActivityMainBinding
 import com.tossdesu.bankcardinfo.domain.entity.CardInfo
 import com.tossdesu.bankcardinfo.presentation.MainActivityUiState.*
+import com.tossdesu.bankcardinfo.presentation.adapter.CardBinsAdapter
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
+
+    @Inject
+    lateinit var cardBinsAdapter: CardBinsAdapter
 
     private val component by lazy {
         (application as BinFinderApp).component
@@ -39,40 +42,49 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        initAdapter()
         observeBinSearching()
         observeSearchView()
     }
 
+    private fun initAdapter() {
+        binding.rvBinsHistory.adapter = cardBinsAdapter
+    }
+
     private fun observeBinSearching() {
         viewModel.uiState.observe(this) {
-            binding.progressBar.visibility = View.GONE
             when(it) {
                 is CardData -> {
-                    Log.d("MainActivity", "CARD = ${it.cardInfo.toString()}")
                     startCardInfoActivity(it.cardInfo)
+                    binding.searchView.setQuery("", false)
+                    hideProgressBar()
                 }
                 is BinSearchHistoryData -> {
+                    if (it.cardBins.isNotEmpty()) {
+                        binding.tvHistoryEmpty.visibility = View.GONE
+                        binding.rvBinsHistory.visibility = View.VISIBLE
+                        cardBinsAdapter.submitList(it.cardBins)
+                    }
                 }
                 is Loading -> {
-                    Log.d("MainActivity", "Loading")
                     binding.progressBar.visibility = View.VISIBLE
                 }
                 is FatalError -> {
-                    Log.d("MainActivity", "FatalError")
+                    hideProgressBar()
                     showDialog(it.title, it.message)
                 }
                 is NoConnectionError -> {
-                    Log.d("MainActivity", "NoConnectionError")
+                    hideProgressBar()
                     val message = resources.getText(R.string.no_internet_connection).toString()
                     showNoConnectionError(message)
                 }
                 is ValidateError -> {
-                    Log.d("MainActivity", "ValidateError")
+                    hideProgressBar()
                     val message = resources.getText(R.string.bin_validate_error).toString()
                     showError(message)
                 }
                 is NothingFoundNotification -> {
-                    Log.d("MainActivity", "NothingFoundNotification")
+                    hideProgressBar()
                     val message = resources.getText(R.string.nothing_found).toString()
                     showDialog(message = message)
                 }
@@ -138,5 +150,9 @@ class MainActivity : AppCompatActivity() {
     private fun hideKeyBoard() {
         val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(binding.root.windowToken, 0)
+    }
+
+    private fun hideProgressBar() {
+        binding.progressBar.visibility = View.GONE
     }
 }
