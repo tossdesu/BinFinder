@@ -124,10 +124,10 @@ class CardInfoActivity : AppCompatActivity() {
         private const val EXTRA_BIN_NUMBER = "extra_bin_number"
 
         fun newIntent(context: Context, bin: String, cardInfo: CardInfo): Intent {
-            val intent = Intent(context, CardInfoActivity::class.java)
-            intent.putExtra(EXTRA_BIN_NUMBER, bin)
-            intent.putExtra(EXTRA_CARD, cardInfo)
-            return intent
+            return Intent(context, CardInfoActivity::class.java).apply {
+                putExtra(EXTRA_BIN_NUMBER, bin)
+                putExtra(EXTRA_CARD, cardInfo)
+            }
         }
     }
 }

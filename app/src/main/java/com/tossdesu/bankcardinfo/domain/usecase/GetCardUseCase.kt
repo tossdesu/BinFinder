@@ -9,7 +9,7 @@ class GetCardUseCase @Inject constructor(
     private val repository: CardsRepository
 ) {
 
-    suspend operator fun invoke(binNumber: Int): Resource<CardInfo> {
-        return repository.getCardUseCase(binNumber)
+    suspend operator fun invoke(binString: String): Resource<CardInfo> {
+        return repository.getCardUseCase(binString)
     }
 }

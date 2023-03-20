@@ -22,13 +22,13 @@ class CardsRepositoryImpl @Inject constructor(
      * Execute cardInfo info downloading request
      * @return Success|Exception object of [Resource] sealed class
      */
-    override suspend fun getCardUseCase(binNumber: Int): Resource<CardInfo> = safeApiCall.run {
-        apiService.getCardInfo(binNumber).toCard()
+    override suspend fun getCardUseCase(binString: String): Resource<CardInfo> = safeApiCall.run {
+        apiService.getCardInfo(binString).toCard()
     }
 
     /**
      * Get all cardInfo bin numbers searched before from DB
-     * @return list of [CardBin] objects
+     * @return livedata list of [CardBin] objects
      */
     override fun getSearchHistoryUseCase(): LiveData<List<CardBin>> =
         Transformations.map(cardBinsDao.getCardBins()) { cardBinDbEntities ->

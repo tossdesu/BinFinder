@@ -46,26 +46,36 @@ class MainViewModel @Inject constructor(
         super.onCleared()
     }
 
-    fun getCardInfo(binString: String?) {
+    fun getCardInfo(binString: String) {
         viewModelScope.launch {
-            val binNumber = validateBinNumberUseCase(binString)
-            if (binNumber == 0) {
-                _uiState.value = MainActivityUiState.ValidateError
-            } else {
+            val isValidate = validateBinNumberUseCase(binString)
+            if (isValidate) {
                 _uiState.value = MainActivityUiState.Loading
-
-                saveCardBin(CardBin(bin = binNumber.toString()))
-
-                val response = getCardUseCase(binNumber)
-                handleResponse(response)
+                val cardResponse = getCardUseCase(binString)
+                handleResponse(cardResponse, binString)
+            } else {
+                _uiState.value = MainActivityUiState.ValidateError
             }
         }
     }
 
-    private fun handleResponse(resource: Resource<CardInfo>) {
+    fun getCardInfoFromHistory(binString: String) {
+        viewModelScope.launch {
+            _uiState.value = MainActivityUiState.Loading
+            val cardResponse = getCardUseCase(binString)
+            handleResponse(cardResponse)
+        }
+    }
+
+    private suspend fun handleResponse(
+        resource: Resource<CardInfo>,
+        binString: String? = null
+    ) {
         if (resource is Resource.Success) {
             _uiState.value = MainActivityUiState.CardData(resource.data)
-
+            binString?.let { bin ->
+                saveCardBin(CardBin(bin = bin))
+            }
         } else if (resource is Resource.Exception) {
             when(resource.cause) {
                 is NoConnection -> {

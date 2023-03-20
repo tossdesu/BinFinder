@@ -6,8 +6,8 @@ import retrofit2.http.Path
 
 interface ApiService {
 
-    @GET("{binNumber}")
+    @GET("{binString}")
     suspend fun getCardInfo(
-        @Path("binNumber") binNumber: Int
+        @Path("binString") binString: String
     ): CardResponseBody
 }

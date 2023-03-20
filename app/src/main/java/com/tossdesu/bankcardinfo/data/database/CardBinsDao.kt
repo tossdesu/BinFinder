@@ -19,6 +19,6 @@ interface CardBinsDao {
      * Get all card bins from DB
      * @return livedata list of [CardBinDbEntity] objects
      */
-    @Query("SELECT * FROM ${CardBinDbEntity.NAME}")
+    @Query("SELECT * FROM ${CardBinDbEntity.NAME} ORDER BY id DESC")
     fun getCardBins(): LiveData<List<CardBinDbEntity>>
 }

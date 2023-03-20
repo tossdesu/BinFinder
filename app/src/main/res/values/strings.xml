@@ -6,7 +6,7 @@
     <string name="history_empty">Вы пока ничего не искали</string>
     <string name="nothing_found">По вашему запросу ничего не найдено</string>
     <string name="bin_validate_error">Для поиска нужно ввести 6 первых цифр номера вашей карты</string>
-    <string name="no_internet_connection">Проверьте подключение к интернету</string>
+    <string name="no_internet_connection">Проверьте наличие подключения к интернету</string>
     <string name="reload_button">Обновить</string>
 
     <!-- CardInfoActivity -->

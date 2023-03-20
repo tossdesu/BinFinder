@@ -1,12 +1,12 @@
 package com.tossdesu.bankcardinfo.presentation
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.allViews
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.tossdesu.bankcardinfo.R
@@ -36,8 +36,6 @@ class MainActivity : AppCompatActivity() {
         ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
     }
 
-    var searchBinQuery: String? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         component.inject(this)
         super.onCreate(savedInstanceState)
@@ -50,44 +48,56 @@ class MainActivity : AppCompatActivity() {
 
     private fun initAdapter() {
         binding.rvBinsHistory.adapter = cardBinsAdapter
+        // Set lambda for on adapter item click event
+        cardBinsAdapter.onHistoryBinClick = { bin ->
+            viewModel.getCardInfoFromHistory(bin)
+        }
     }
 
     private fun observeBinSearching() {
-        viewModel.uiState.observe(this) {
-            when(it) {
-                is CardData -> {
-                    startCardInfoActivity(it.cardInfo)
-                    binding.searchView.setQuery("", false)
-                    hideProgressBar()
-                }
-                is BinSearchHistoryData -> {
-                    if (it.cardBins.isNotEmpty()) {
-                        binding.tvHistoryEmpty.visibility = View.GONE
-                        binding.rvBinsHistory.visibility = View.VISIBLE
-                        cardBinsAdapter.submitList(it.cardBins)
+        with(binding) {
+            viewModel.uiState.observe(this@MainActivity) { uiState ->
+                // Enable searchView in all cases except when loading data
+                if (!searchView.isEnabled)
+                    enableSearchView()
+                // Hide progressBar in all cases except when loading search history of bin numbers
+                if (progressBar.isShown && uiState !is BinSearchHistoryData)
+                    progressBar.visibility = View.GONE
+                // Analysing what we should do with UI of activity
+                when (uiState) {
+                    is CardData -> {
+                        startCardInfoActivity(uiState.cardInfo)
+                        searchView.setQuery("", false)
                     }
-                }
-                is Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                }
-                is FatalError -> {
-                    hideProgressBar()
-                    showDialog(it.title, it.message)
-                }
-                is NoConnectionError -> {
-                    hideProgressBar()
-                    val message = resources.getText(R.string.no_internet_connection).toString()
-                    showNoConnectionError(message)
-                }
-                is ValidateError -> {
-                    hideProgressBar()
-                    val message = resources.getText(R.string.bin_validate_error).toString()
-                    showError(message)
-                }
-                is NothingFoundNotification -> {
-                    hideProgressBar()
-                    val message = resources.getText(R.string.nothing_found).toString()
-                    showDialog(message = message)
+                    is BinSearchHistoryData -> {
+                        if (uiState.cardBins.isNotEmpty()) {
+                            if (tvHistoryEmpty.isShown) {
+                                tvHistoryEmpty.visibility = View.GONE
+                                rvBinsHistory.visibility = View.VISIBLE
+                            }
+                            cardBinsAdapter.submitList(uiState.cardBins)
+                        }
+                    }
+                    is Loading -> {
+                        // Disable searchView when loading data
+                        enableSearchView(false)
+                        // Show progressBar
+                        progressBar.visibility = View.VISIBLE
+                    }
+                    is FatalError -> {
+                        showDialog(uiState.title, uiState.message)
+                    }
+                    is NoConnectionError -> {
+                        showNoConnectionError()
+                    }
+                    is ValidateError -> {
+                        val message = resources.getText(R.string.bin_validate_error).toString()
+                        showError(message)
+                    }
+                    is NothingFoundNotification -> {
+                        val message = resources.getText(R.string.nothing_found).toString()
+                        showDialog(message = message)
+                    }
                 }
             }
         }
@@ -96,10 +106,12 @@ class MainActivity : AppCompatActivity() {
     private fun observeSearchView() {
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                hideKeyBoard()
-                searchBinQuery = query
-                viewModel.getCardInfo(searchBinQuery)
-                return true
+                query?.let {
+                    hideKeyBoard()
+                    viewModel.getCardInfo(query)
+                    return true
+                }
+                return false
             }
             override fun onQueryTextChange(newText: String?): Boolean {
                 return false
@@ -110,7 +122,7 @@ class MainActivity : AppCompatActivity() {
     private fun startCardInfoActivity(cardInfo: CardInfo) {
         val intent = CardInfoActivity.newIntent(
             this,
-            searchBinQuery ?: "",
+            getSearchBinString(),
             cardInfo
         )
         startActivity(intent)
@@ -124,14 +136,14 @@ class MainActivity : AppCompatActivity() {
         ).show()
     }
 
-    private fun showNoConnectionError(message: String) {
+    private fun showNoConnectionError() {
         Snackbar.make(
             binding.root,
-            message,
+            resources.getText(R.string.no_internet_connection).toString(),
             Snackbar.LENGTH_INDEFINITE
         )
             .setAction(resources.getText(R.string.reload_button)) {
-                viewModel.getCardInfo(searchBinQuery)
+                viewModel.getCardInfo(getSearchBinString())
             }.show()
     }
 
@@ -153,7 +165,9 @@ class MainActivity : AppCompatActivity() {
         inputMethodManager.hideSoftInputFromWindow(binding.root.windowToken, 0)
     }
 
-    private fun hideProgressBar() {
-        binding.progressBar.visibility = View.GONE
+    private fun getSearchBinString() : String = binding.searchView.query.toString()
+
+    private fun enableSearchView(isEnable: Boolean = true) {
+        binding.searchView.allViews.forEach { it.isEnabled = isEnable }
     }
 }

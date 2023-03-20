@@ -10,7 +10,7 @@ interface CardsRepository {
      * Execute cardInfo info downloading request
      * @return Success|GenericError|NetworkError object of [Resource] sealed class
      */
-    suspend fun getCardUseCase(binNumber: Int) : Resource<CardInfo>
+    suspend fun getCardUseCase(binString: String) : Resource<CardInfo>
 
     /**
      * Get all cardInfo bin numbers searched before from DB
