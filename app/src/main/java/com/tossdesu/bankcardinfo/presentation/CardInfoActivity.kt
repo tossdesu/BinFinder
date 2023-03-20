@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.tossdesu.bankcardinfo.R
@@ -17,7 +18,7 @@ class CardInfoActivity : AppCompatActivity() {
         ActivityBinInfoBinding.inflate(layoutInflater)
     }
 
-    private lateinit var bin: String
+    private lateinit var binString: String
     private lateinit var cardInfo: CardInfo
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,34 +44,43 @@ class CardInfoActivity : AppCompatActivity() {
 
     private fun parsIntent() {
         if (!intent.hasExtra(EXTRA_BIN_NUMBER))
-            throw RuntimeException("Param EXTRA_BIN_NUMBER is absent")
+            throw RuntimeException("EXTRA_BIN_NUMBER param is absent")
         if (!intent.hasExtra(EXTRA_CARD))
-            throw RuntimeException("Param EXTRA_CARD is absent")
+            throw RuntimeException("EXTRA_CARD param is absent")
 
-        bin = intent.getStringExtra(EXTRA_BIN_NUMBER).toString()
-        intent.getParcelableExtra<CardInfo>(EXTRA_CARD)?.let {
-            cardInfo = it
-        }
+        binString = intent.getStringExtra(EXTRA_BIN_NUMBER).toString()
+        cardInfo = intent.getParcelableExtra(EXTRA_CARD)
+            ?: throw RuntimeException("CardInfo contains null")
     }
 
     private fun bindViews() {
         with(binding) {
             //Bin number
-            tvBinNumber.text = bin
+            tvBinNumber.text = binString
+
             //Bank
             tvBankName.text = cardInfo.bankName ?: NO_INFO
             tvUrl.text = cardInfo.bankUrl ?: NO_INFO
-            cardInfo.bankUrl?.let { setBankUrl(it) }
+            cardInfo.bankUrl?.let {
+                setOnUrlClickListener(it)
+                setClickableTextColor(tvUrl)
+            }
             tvPhone.text = cardInfo.bankPhone ?: NO_INFO
-            cardInfo.bankPhone?.let { setBankPhone(it) }
+            cardInfo.bankPhone?.let {
+                setOnPhoneClickListener(it)
+                setClickableTextColor(tvPhone)
+            }
             tvCity.text = cardInfo.bankCity ?: NO_INFO
+
             //Country
             tvCountryAlpha2.text = cardInfo.countryAlpha2
             tvCountry.text = cardInfo.countryName
             tvCoordinates.text = getCoordinatesString()
-            setBankCoordinates(cardInfo.latitude, cardInfo.longitude)
+            setOnCoordinatesClickListener(cardInfo.latitude, cardInfo.longitude)
+            setClickableTextColor(tvCoordinates)
             tvCurrency.text = cardInfo.currency
-            //Card
+
+            //Additional information
             tvScheme.text = cardInfo.cardScheme
             tvCardType.text = cardInfo.cardType ?: NO_INFO
             tvBrand.text = cardInfo.cardBrand ?: NO_INFO
@@ -83,37 +93,32 @@ class CardInfoActivity : AppCompatActivity() {
     private fun getCoordinatesString() =
         "(latitude: ${cardInfo.latitude}, longitude: ${cardInfo.longitude})"
 
-    private fun setBankPhone(phoneNumber: String) {
-        with(binding.tvPhone) {
-            setTextColor(ContextCompat.getColor(this@CardInfoActivity, R.color.blue_500))
-            setOnClickListener {
-                val phoneIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
-                startActivity(phoneIntent)
-            }
+    private fun setOnPhoneClickListener(phoneNumber: String) {
+        binding.tvPhone.setOnClickListener {
+            val phoneIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
+            startActivity(phoneIntent)
         }
     }
 
-    private fun setBankUrl(url: String) {
-        with(binding.tvUrl) {
-            setTextColor(ContextCompat.getColor(this@CardInfoActivity, R.color.blue_500))
-            setOnClickListener {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://$url"))
-                startActivity(browserIntent)
-            }
+    private fun setOnUrlClickListener(url: String) {
+        binding.tvUrl.setOnClickListener {
+            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://$url"))
+            startActivity(browserIntent)
         }
     }
 
-    private fun setBankCoordinates(latitude: Float, longitude: Float) {
-        with(binding.tvCoordinates) {
-            setTextColor(ContextCompat.getColor(this@CardInfoActivity, R.color.blue_500))
-            setOnClickListener {
-                val intent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("geo:$latitude,$longitude")
-                )
-                startActivity(intent)
-            }
+    private fun setOnCoordinatesClickListener(latitude: Float, longitude: Float) {
+        binding.tvCoordinates.setOnClickListener {
+            val mapIntent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("geo:$latitude,$longitude")
+            )
+            startActivity(mapIntent)
         }
+    }
+
+    private fun setClickableTextColor(textView: TextView) {
+        textView.setTextColor(ContextCompat.getColor(this, R.color.blue_500))
     }
 
     companion object {
