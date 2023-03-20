@@ -57,9 +57,11 @@ class MainActivity : AppCompatActivity() {
     private fun observeBinSearching() {
         with(binding) {
             viewModel.uiState.observe(this@MainActivity) { uiState ->
-                // Enable searchView in all cases except when loading data
+                // Enable SearchView and RecyclerView if they were disabled when loading data
                 if (!searchView.isEnabled)
                     enableSearchView()
+                if (!rvBinsHistory.isEnabled)
+                    enableRecyclerView()
                 // Hide progressBar in all cases except when loading search history of bin numbers
                 if (progressBar.isShown && uiState !is BinSearchHistoryData)
                     progressBar.visibility = View.GONE
@@ -79,8 +81,9 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     is Loading -> {
-                        // Disable searchView when loading data
+                        // Disable SearchView and RecyclerView when loading data
                         enableSearchView(false)
+                        enableRecyclerView(false)
                         // Show progressBar
                         progressBar.visibility = View.VISIBLE
                     }
@@ -169,5 +172,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun enableSearchView(isEnable: Boolean = true) {
         binding.searchView.allViews.forEach { it.isEnabled = isEnable }
+    }
+
+    private fun enableRecyclerView(isEnable: Boolean = true) {
+        binding.rvBinsHistory.allViews.forEach { it.isEnabled = isEnable }
     }
 }

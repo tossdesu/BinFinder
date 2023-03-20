@@ -9,6 +9,7 @@ import com.tossdesu.bankcardinfo.domain.usecase.GetCardUseCase
 import com.tossdesu.bankcardinfo.domain.usecase.GetSearchHistoryUseCase
 import com.tossdesu.bankcardinfo.domain.usecase.SaveBinUseCase
 import com.tossdesu.bankcardinfo.domain.usecase.ValidateBinNumberUseCase
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,6 +34,8 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    private var searchJob: Job? = null
+
     init {
         getHistory()
     }
@@ -47,7 +50,10 @@ class MainViewModel @Inject constructor(
     }
 
     fun getCardInfo(binString: String) {
-        viewModelScope.launch {
+        searchJob?.let {
+            if (it.isActive) return
+        }
+        searchJob = viewModelScope.launch {
             val isValidate = validateBinNumberUseCase(binString)
             if (isValidate) {
                 _uiState.value = MainActivityUiState.Loading
@@ -60,7 +66,10 @@ class MainViewModel @Inject constructor(
     }
 
     fun getCardInfoFromHistory(binString: String) {
-        viewModelScope.launch {
+        searchJob?.let {
+            if (it.isActive) return
+        }
+        searchJob = viewModelScope.launch {
             _uiState.value = MainActivityUiState.Loading
             val cardResponse = getCardUseCase(binString)
             handleResponse(cardResponse)
