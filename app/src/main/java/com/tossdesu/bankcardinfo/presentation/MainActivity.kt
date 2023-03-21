@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
         // Set lambda for on adapter item click event
         cardBinsAdapter.onHistoryBinClick = { bin ->
             viewModel.getCardInfoFromHistory(bin)
+            binding.searchView.setQuery(bin, false)
         }
     }
 
@@ -77,7 +78,9 @@ class MainActivity : AppCompatActivity() {
                                 tvHistoryEmpty.visibility = View.GONE
                                 rvBinsHistory.visibility = View.VISIBLE
                             }
-                            cardBinsAdapter.submitList(uiState.cardBins)
+                            cardBinsAdapter.submitList(uiState.cardBins) {
+                                rvBinsHistory.scrollToPosition(0)
+                            }
                         }
                     }
                     is Loading -> {

@@ -51,7 +51,8 @@ class MainViewModel @Inject constructor(
 
     fun getCardInfo(binString: String) {
         searchJob?.let {
-            if (it.isActive) return
+            if (it.isActive)
+                return
         }
         searchJob = viewModelScope.launch {
             val isValidate = validateBinNumberUseCase(binString)
@@ -67,7 +68,8 @@ class MainViewModel @Inject constructor(
 
     fun getCardInfoFromHistory(binString: String) {
         searchJob?.let {
-            if (it.isActive) return
+            if (it.isActive)
+                return
         }
         searchJob = viewModelScope.launch {
             _uiState.value = MainActivityUiState.Loading
