@@ -7,7 +7,7 @@ import com.tossdesu.bankcardinfo.data.database.entity.CardBinDbEntity
 import com.tossdesu.bankcardinfo.data.network.ApiService
 import com.tossdesu.bankcardinfo.data.network.SafeApiCall
 import com.tossdesu.bankcardinfo.domain.CardsRepository
-import com.tossdesu.bankcardinfo.domain.Resource
+import com.tossdesu.bankcardinfo.domain.Result
 import com.tossdesu.bankcardinfo.domain.entity.CardInfo
 import com.tossdesu.bankcardinfo.domain.entity.CardBin
 import javax.inject.Inject
@@ -20,9 +20,9 @@ class CardsRepositoryImpl @Inject constructor(
 
     /**
      * Execute cardInfo info downloading request
-     * @return Success|Exception object of [Resource] sealed class
+     * @return Success|Error|Exception object of [Result] sealed class
      */
-    override suspend fun getCardUseCase(binString: String): Resource<CardInfo> = safeApiCall.run {
+    override suspend fun getCardUseCase(binString: String): Result<CardInfo> = safeApiCall.run {
         apiService.getCardInfo(binString).toCard()
     }
 

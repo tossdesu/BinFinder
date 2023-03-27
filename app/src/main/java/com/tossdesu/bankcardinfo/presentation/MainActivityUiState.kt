@@ -9,17 +9,17 @@ import com.tossdesu.bankcardinfo.presentation.MainActivityUiState.*
  * [CardData] - successful response, receive info about cardInfo as [CardInfo] object
  * [BinSearchHistoryData] - response, receive livedata list of [CardBin] objects
  * [Loading] - showing progress bar, while loading data
- * [FatalError] - showing alert dialog for HttpExceptions(except 404, 400) and Unknown Exceptions
+ * [Error] - business logic errors, showing Snackbar without any buttons
  * [NoConnectionError] - IOException (No Internet connection), showing Snackbar with reload button
- * [ValidateError] - business logic errors, showing Snackbar without any buttons
  * [NothingFoundNotification] - 404, 400 HttpException handling, nothing was found
+ * [FatalError] - showing alert dialog for HttpExceptions(except 404, 400) and Unknown Exceptions
  */
 sealed class MainActivityUiState {
     data class CardData(val cardInfo: CardInfo) : MainActivityUiState()
     data class BinSearchHistoryData(val cardBins: List<CardBin>) : MainActivityUiState()
     object Loading : MainActivityUiState()
-    data class FatalError(val title: String, val message: String) : MainActivityUiState()
+    data class Error(val messageStringResource: Int) : MainActivityUiState()
     object NoConnectionError : MainActivityUiState()
-    object ValidateError : MainActivityUiState()
     object NothingFoundNotification : MainActivityUiState()
+    data class FatalError(val title: String, val message: String) : MainActivityUiState()
 }

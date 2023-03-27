@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         binding.rvBinsHistory.adapter = cardBinsAdapter
         // Set lambda for on adapter item click event
         cardBinsAdapter.onHistoryBinClick = { bin ->
-            viewModel.getCardInfoFromHistory(bin)
+            viewModel.getCardInfo(bin, true)
             binding.searchView.setQuery(bin, false)
         }
     }
@@ -90,19 +90,19 @@ class MainActivity : AppCompatActivity() {
                         // Show progressBar
                         progressBar.visibility = View.VISIBLE
                     }
-                    is FatalError -> {
-                        showDialog(uiState.title, uiState.message)
+                    is Error -> {
+                        val message = resources.getText(uiState.messageStringResource).toString()
+                        showError(message)
                     }
                     is NoConnectionError -> {
                         showNoConnectionError()
                     }
-                    is ValidateError -> {
-                        val message = resources.getText(R.string.bin_validate_error).toString()
-                        showError(message)
-                    }
                     is NothingFoundNotification -> {
                         val message = resources.getText(R.string.nothing_found).toString()
                         showDialog(message = message)
+                    }
+                    is FatalError -> {
+                        showDialog(uiState.title, uiState.message)
                     }
                 }
             }
@@ -155,8 +155,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showDialog(title: String? = null, message: String) {
         val builder = AlertDialog.Builder(this)
-        with(builder)
-        {
+        with(builder) {
             title?.let { setTitle(title) }
             setMessage(message)
             setPositiveButton("OK") { dialog, _ ->
