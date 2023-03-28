@@ -1,15 +1,17 @@
 package com.tossdesu.bankcardinfo.data
 
+import android.util.Log
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.MediatorLiveData
 import com.tossdesu.bankcardinfo.data.database.CardBinsDao
 import com.tossdesu.bankcardinfo.data.database.entity.CardBinDbEntity
 import com.tossdesu.bankcardinfo.data.network.ApiService
 import com.tossdesu.bankcardinfo.data.network.SafeApiCall
 import com.tossdesu.bankcardinfo.domain.CardsRepository
 import com.tossdesu.bankcardinfo.domain.Result
-import com.tossdesu.bankcardinfo.domain.entity.CardInfo
+import com.tossdesu.bankcardinfo.domain.Result.Exception.Cause
 import com.tossdesu.bankcardinfo.domain.entity.CardBin
+import com.tossdesu.bankcardinfo.domain.entity.CardInfo
 import javax.inject.Inject
 
 class CardsRepositoryImpl @Inject constructor(
@@ -20,7 +22,7 @@ class CardsRepositoryImpl @Inject constructor(
 
     /**
      * Execute cardInfo info downloading request
-     * @return Success|Error|Exception object of [Result] sealed class
+     * @return Success|Exception object of [Result] sealed class
      */
     override suspend fun getCardUseCase(binString: String): Result<CardInfo> = safeApiCall.run {
         apiService.getCardInfo(binString).toCard()
@@ -28,17 +30,40 @@ class CardsRepositoryImpl @Inject constructor(
 
     /**
      * Get all cardInfo bin numbers searched before from DB
-     * @return livedata list of [CardBin] objects
+     * @return livedata Success|DatabaseException object of [Result] sealed class
      */
-    override fun getSearchHistoryUseCase(): LiveData<List<CardBin>> =
-        Transformations.map(cardBinsDao.getCardBins()) { cardBinDbEntities ->
-            cardBinDbEntities.map { it.toCardBin() }
+    override fun getSearchHistoryUseCase(): LiveData<Result<List<CardBin>>> {
+        return MediatorLiveData<Result<List<CardBin>>>().apply {
+            try {
+                addSource(cardBinsDao.getCardBins()) { cardBinDbEntitiesList ->
+                    Log.d("checking", "getSearchHistoryUseCase")
+                    val cardBinsList = cardBinDbEntitiesList.map { it.toCardBin() }
+                    value = Result.Success(cardBinsList)
+                }
+            } catch (e: Exception) {
+                Result.Exception(
+                    Cause.DatabaseException(
+                        e.message ?: "Database Error while getting search history"
+                    )
+                )
+            }
         }
+    }
 
     /**
      * Put searched cardInfo bin number as [CardBin] object into DB
+     *  @return Success|DatabaseException object of [Result] sealed class
      */
-    override suspend fun saveBinUseCase(cardBin: CardBin) {
-        cardBinsDao.saveCardBin(CardBinDbEntity.fromCardBin(cardBin))
+    override suspend fun saveBinUseCase(cardBin: CardBin): Result<Unit> {
+        return try {
+            cardBinsDao.saveCardBin(CardBinDbEntity.fromCardBin(cardBin))
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Exception(
+                Cause.DatabaseException(
+                    e.message ?: "Database Error while saving searched bin number"
+                )
+            )
+        }
     }
 }

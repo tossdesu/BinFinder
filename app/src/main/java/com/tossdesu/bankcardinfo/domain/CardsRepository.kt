@@ -8,18 +8,19 @@ interface CardsRepository {
 
     /**
      * Execute cardInfo info downloading request
-     * @return Success|Error|GenericError|NetworkError object of [Result] sealed class
+     * @return Success|Exception object of [Result] sealed class
      */
     suspend fun getCardUseCase(binString: String) : Result<CardInfo>
 
     /**
      * Get all cardInfo bin numbers searched before from DB
-     * @return livedata list of [CardBin] objects
+     * @return livedata Success|DatabaseException object of [Result] sealed class
      */
-    fun getSearchHistoryUseCase(): LiveData<List<CardBin>>
+    fun getSearchHistoryUseCase(): LiveData<Result<List<CardBin>>>
 
     /**
      * Put searched cardInfo bin number as [CardBin] object into DB
+     *  @return Success|DatabaseException object of [Result] sealed class
      */
-    suspend fun saveBinUseCase(cardBin: CardBin)
+    suspend fun saveBinUseCase(cardBin: CardBin): Result<Unit>
 }

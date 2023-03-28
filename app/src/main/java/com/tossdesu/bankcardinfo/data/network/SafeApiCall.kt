@@ -22,7 +22,7 @@ class SafeApiCall @Inject constructor() {
                 // retrofit
                 is HttpException -> {
                     val code = e.code()
-                    if (code == 400 || code == 404) {
+                    if (code == 404) {
                         Result.Exception(Cause.HttpResponseNothingFound)
                     } else {
                         Result.Exception(Cause.HttpException(code, e.message()))

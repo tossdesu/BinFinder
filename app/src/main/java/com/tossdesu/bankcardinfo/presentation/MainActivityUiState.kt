@@ -11,8 +11,9 @@ import com.tossdesu.bankcardinfo.presentation.MainActivityUiState.*
  * [Loading] - showing progress bar, while loading data
  * [Error] - business logic errors, showing Snackbar without any buttons
  * [NoConnectionError] - IOException (No Internet connection), showing Snackbar with reload button
- * [NothingFoundNotification] - 404, 400 HttpException handling, nothing was found
- * [FatalError] - showing alert dialog for HttpExceptions(except 404, 400) and Unknown Exceptions
+ * [NothingFoundNotification] - 404 HttpException handling, nothing was found
+ * [FatalError] - showing alert dialog for HttpExceptions(except 404), Database Exceptions
+ * and Unknown Exceptions
  */
 sealed class MainActivityUiState {
     data class CardData(val cardInfo: CardInfo) : MainActivityUiState()
