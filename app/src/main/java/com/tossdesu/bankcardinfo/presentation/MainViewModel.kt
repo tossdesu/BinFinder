@@ -1,5 +1,6 @@
 package com.tossdesu.bankcardinfo.presentation
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.tossdesu.bankcardinfo.domain.Result
 import com.tossdesu.bankcardinfo.domain.Result.Exception.Cause.*
@@ -26,8 +27,15 @@ class MainViewModel @Inject constructor(
     }
 
     private val binSearchUpdated by lazy {
-        Observer<List<CardBin>> {
-            _uiState.value = MainActivityUiState.BinSearchHistoryData(it)
+        Observer<Result<List<CardBin>>> {
+             if (it is Result.Success) {
+                 Log.d("checking", "binSearchUpdated - Result.Success")
+                 _uiState.value = MainActivityUiState.BinSearchHistoryData(it.data)
+            } else if (it is Result.Exception) {
+                 Log.d("checking", "binSearchUpdated - Result.Exception")
+                handleException(it)
+            }
+            Log.d("checking", "binSearchUpdated")
         }
     }
 
@@ -62,35 +70,49 @@ class MainViewModel @Inject constructor(
                     saveCardBin(CardBin(bin = binString))
                 }
 
+            // Business logic error handling
             } else if (result is Result.Error) {
                 _uiState.value = MainActivityUiState.Error(result.messageStringResource)
 
+            // Exceptions handling
             } else if (result is Result.Exception) {
-                when (result.cause) {
-                    is NoConnection -> {
-                        _uiState.value = MainActivityUiState.NoConnectionError
-                    }
-                    is HttpResponseNothingFound -> {
-                        _uiState.value = MainActivityUiState.NothingFoundNotification
-                    }
-                    is HttpException -> {
-                        _uiState.value = MainActivityUiState.FatalError(
-                            "Network Error",
-                            "Code: ${result.cause.code} \nMessage: ${result.cause.message}"
-                        )
-                    }
-                    is Unknown -> {
-                        _uiState.value = MainActivityUiState.FatalError(
-                            "Unknown Error",
-                            result.cause.message
-                        )
-                    }
-                }
+                handleException(result)
             }
         }
     }
 
     private suspend fun saveCardBin(bin: CardBin) {
-        saveBinUseCase(bin)
+        val result = saveBinUseCase(bin)
+        if (result is Result.Exception)
+            handleException(result)
+    }
+
+    private fun handleException(e: Result.Exception) {
+        when (e.cause) {
+            is NoConnection -> {
+                _uiState.value = MainActivityUiState.NoConnectionError
+            }
+            is HttpResponseNothingFound -> {
+                _uiState.value = MainActivityUiState.NothingFoundNotification
+            }
+            is HttpException -> {
+                _uiState.value = MainActivityUiState.FatalError(
+                    "Network Error",
+                    "Code: ${e.cause.code} \nMessage: ${e.cause.message}"
+                )
+            }
+            is DatabaseException -> {
+                _uiState.value = MainActivityUiState.FatalError(
+                    "Database Error",
+                    e.cause.message
+                )
+            }
+            is Unknown -> {
+                _uiState.value = MainActivityUiState.FatalError(
+                    "Unknown Error",
+                    e.cause.message
+                )
+            }
+        }
     }
 }

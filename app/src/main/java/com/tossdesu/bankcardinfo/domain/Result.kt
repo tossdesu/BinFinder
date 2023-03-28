@@ -8,6 +8,7 @@ package com.tossdesu.bankcardinfo.domain
  * [Exception.Cause.NoConnection] - IOException
  * [Exception.Cause.HttpResponseNothingFound] - 404, 400 HttpException handling
  * [Exception.Cause.HttpException] - Others HttpException, passing code and message
+ * [Exception.Cause.DatabaseException] - All database exceptions, passing message
  * [Exception.Cause.Unknown] - Unknown Exception, passing message
  */
 sealed class Result<out T> {
@@ -18,6 +19,7 @@ sealed class Result<out T> {
             object NoConnection : Cause()
             object HttpResponseNothingFound : Cause()
             data class HttpException(val code: Int, val message: String) : Cause()
+            data class DatabaseException(val message: String) : Cause()
             data class Unknown(val message: String) : Cause()
         }
     }
