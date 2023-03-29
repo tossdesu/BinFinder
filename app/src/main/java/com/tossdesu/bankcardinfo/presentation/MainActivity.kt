@@ -1,6 +1,7 @@
 package com.tossdesu.bankcardinfo.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
@@ -73,6 +74,7 @@ class MainActivity : AppCompatActivity() {
                         searchView.setQuery("", false)
                     }
                     is BinSearchHistoryData -> {
+                        Log.d("checking", "BinSearchHistoryData")
                         if (uiState.cardBins.isNotEmpty()) {
                             if (tvHistoryEmpty.isShown) {
                                 tvHistoryEmpty.visibility = View.GONE
