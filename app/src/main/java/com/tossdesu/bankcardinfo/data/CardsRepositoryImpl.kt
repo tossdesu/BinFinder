@@ -1,6 +1,5 @@
 package com.tossdesu.bankcardinfo.data
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import com.tossdesu.bankcardinfo.data.database.CardBinsDao
@@ -36,7 +35,6 @@ class CardsRepositoryImpl @Inject constructor(
         return MediatorLiveData<Result<List<CardBin>>>().apply {
             try {
                 addSource(cardBinsDao.getCardBins()) { cardBinDbEntitiesList ->
-                    Log.d("checking", "getSearchHistoryUseCase")
                     val cardBinsList = cardBinDbEntitiesList.map { it.toCardBin() }
                     value = Result.Success(cardBinsList)
                 }

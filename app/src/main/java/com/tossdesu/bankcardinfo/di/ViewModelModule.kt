@@ -1,7 +1,7 @@
 package com.tossdesu.bankcardinfo.di
 
 import androidx.lifecycle.ViewModel
-import com.tossdesu.bankcardinfo.presentation.MainViewModel
+import com.tossdesu.bankcardinfo.presentation.CardSearchViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -10,7 +10,7 @@ import dagger.multibindings.IntoMap
 interface ViewModelModule {
 
     @IntoMap
-    @ViewModelKey(MainViewModel::class)
+    @ViewModelKey(CardSearchViewModel::class)
     @Binds
-    fun bindMainViewModel(viewModel: MainViewModel): ViewModel
+    fun bindCardSearchViewModel(viewModel: CardSearchViewModel): ViewModel
 }

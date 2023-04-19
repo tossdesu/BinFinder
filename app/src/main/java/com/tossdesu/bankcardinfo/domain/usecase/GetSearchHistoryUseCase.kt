@@ -1,6 +1,5 @@
 package com.tossdesu.bankcardinfo.domain.usecase
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import com.tossdesu.bankcardinfo.domain.CardsRepository
 import com.tossdesu.bankcardinfo.domain.Result
@@ -12,8 +11,6 @@ class GetSearchHistoryUseCase@Inject constructor(
 ) {
 
     operator fun invoke(): LiveData<Result<List<CardBin>>> {
-        val response = repository.getSearchHistoryUseCase()
-        Log.d("checking", "GetSearchHistoryUseCase response: $response")
-        return response
+        return repository.getSearchHistoryUseCase()
     }
 }

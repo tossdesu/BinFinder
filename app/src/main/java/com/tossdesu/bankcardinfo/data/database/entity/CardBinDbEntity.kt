@@ -4,8 +4,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.tossdesu.bankcardinfo.data.database.entity.CardBinDbEntity.Companion.NAME
 import com.tossdesu.bankcardinfo.domain.entity.CardBin
-import java.time.Instant
-import java.time.format.DateTimeFormatter
 
 /**
  * Card DB Entity

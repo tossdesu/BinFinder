@@ -1,7 +1,7 @@
 package com.tossdesu.bankcardinfo.di
 
 import android.app.Application
-import com.tossdesu.bankcardinfo.presentation.MainActivity
+import com.tossdesu.bankcardinfo.presentation.CardSearchFragment
 import dagger.BindsInstance
 import dagger.Component
 
@@ -14,7 +14,7 @@ import dagger.Component
 )
 interface ApplicationComponent {
 
-    fun inject(activity: MainActivity)
+    fun inject(fragment: CardSearchFragment)
 
     @Component.Factory
     interface Factory {

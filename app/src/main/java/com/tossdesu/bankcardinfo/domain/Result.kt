@@ -6,7 +6,7 @@ package com.tossdesu.bankcardinfo.domain
  * [Error]      - domain layer errors that are related to the business logic
  * [Exception]  - type of exception that related with network (Retrofit)
  * [Exception.Cause.NoConnection] - IOException
- * [Exception.Cause.HttpResponseNothingFound] - 404, 400 HttpException handling
+ * [Exception.Cause.HttpResponseNothingFound] - 404 HttpException handling
  * [Exception.Cause.HttpException] - Others HttpException, passing code and message
  * [Exception.Cause.DatabaseException] - All database exceptions, passing message
  * [Exception.Cause.Unknown] - Unknown Exception, passing message

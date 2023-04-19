@@ -11,7 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class MainViewModel @Inject constructor(
+class CardSearchViewModel @Inject constructor(
     private val getCardUseCase: GetCardUseCase,
     private val saveBinUseCase: SaveBinUseCase,
     private val getSearchHistoryUseCase: GetSearchHistoryUseCase
@@ -26,11 +26,11 @@ class MainViewModel @Inject constructor(
     }
 
     private val binSearchUpdated by lazy {
-        Observer<Result<List<CardBin>>> {
-             if (it is Result.Success) {
-                 _uiState.value = MainActivityUiState.BinSearchHistoryData(it.data)
-            } else if (it is Result.Exception) {
-                handleException(it)
+        Observer<Result<List<CardBin>>> { result ->
+             if (result is Result.Success) {
+                 _uiState.value = MainActivityUiState.BinSearchHistoryData(result.data)
+            } else if (result is Result.Exception) {
+                handleException(result)
             }
         }
     }
