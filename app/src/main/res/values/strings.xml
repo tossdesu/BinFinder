@@ -10,7 +10,7 @@
     <string name="reload_button">Обновить</string>
 
     <!-- CardInfoActivity -->
-    <string name="card_info_activity_label">Информация о карте</string>
+    <string name="card_info_fragment_label">Информация о карте</string>
     <string name="bank_info_title">Банк</string>
     <string name="country_info_title">Страна</string>
     <string name="card_info_title">Дополнительно</string>

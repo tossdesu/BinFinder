@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.allViews
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.tossdesu.bankcardinfo.R
@@ -54,8 +55,8 @@ class CardSearchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         initAdapter()
+        getBinSearchHistory()
         observeBinSearching()
         observeSearchView()
     }
@@ -63,6 +64,10 @@ class CardSearchFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun getBinSearchHistory() {
+        viewModel.getHistory()
     }
 
     private fun initAdapter() {
@@ -83,15 +88,18 @@ class CardSearchFragment : Fragment() {
                 if (!rvBinsHistory.isEnabled)
                     enableRecyclerView()
                 // Hide progressBar in all cases except when loading search history of bin numbers
-                if (progressBar.isShown && uiState !is MainActivityUiState.BinSearchHistoryData)
+                if (progressBar.isShown && uiState !is CardSearchFragmentUiState.BinSearchHistoryData)
                     progressBar.visibility = View.GONE
-                // Analysing what we should do with UI of activity
+                // Analysing what we should do with fragment UI
                 when (uiState) {
-                    is MainActivityUiState.CardData -> {
-                        startCardInfoActivity(uiState.cardInfo)
-                        searchView.setQuery("", false)
+                    is CardSearchFragmentUiState.CardData -> {
+                        // Collect data from ViewModel when fragment view is in RESUMED state only
+                        if (viewLifecycleOwner.lifecycle.currentState == Lifecycle.State.RESUMED) {
+                            launchCardInfoFragment(uiState.cardInfo)
+                            searchView.setQuery("", false)
+                        }
                     }
-                    is MainActivityUiState.BinSearchHistoryData -> {
+                    is CardSearchFragmentUiState.BinSearchHistoryData -> {
                         if (uiState.cardBins.isNotEmpty()) {
                             if (tvHistoryEmpty.isShown) {
                                 tvHistoryEmpty.visibility = View.GONE
@@ -102,25 +110,26 @@ class CardSearchFragment : Fragment() {
                             }
                         }
                     }
-                    is MainActivityUiState.Loading -> {
+                    is CardSearchFragmentUiState.Loading -> {
                         // Disable SearchView and RecyclerView when loading data
                         enableSearchView(false)
                         enableRecyclerView(false)
                         // Show progressBar
                         progressBar.visibility = View.VISIBLE
                     }
-                    is MainActivityUiState.Error -> {
-                        val message = resources.getText(uiState.messageStringResource).toString()
+                    is CardSearchFragmentUiState.Error -> {
+                        val message =
+                            resources.getText(uiState.messageStringResource).toString()
                         showError(message)
                     }
-                    is MainActivityUiState.NoConnectionError -> {
+                    is CardSearchFragmentUiState.NoConnectionError -> {
                         showNoConnectionError()
                     }
-                    is MainActivityUiState.NothingFoundNotification -> {
+                    is CardSearchFragmentUiState.NothingFoundNotification -> {
                         val message = resources.getText(R.string.nothing_found).toString()
                         showDialog(message = message)
                     }
-                    is MainActivityUiState.FatalError -> {
+                    is CardSearchFragmentUiState.FatalError -> {
                         showDialog(uiState.title, uiState.message)
                     }
                 }
@@ -145,13 +154,12 @@ class CardSearchFragment : Fragment() {
         })
     }
 
-    private fun startCardInfoActivity(cardInfo: CardInfo) {
-        val intent = CardInfoActivity.newIntent(
-            requireContext(),
-            getSearchBinString(),
-            cardInfo
-        )
-        startActivity(intent)
+    private fun launchCardInfoFragment(cardInfo: CardInfo) {
+        val infoFragment = CardInfoFragment.newInstance(getSearchBinString(), cardInfo)
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, infoFragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun showError(message: String) {

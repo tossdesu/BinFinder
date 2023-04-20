@@ -1,7 +1,5 @@
 package com.tossdesu.bankcardinfo.data
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import com.tossdesu.bankcardinfo.data.database.CardBinsDao
 import com.tossdesu.bankcardinfo.data.database.entity.CardBinDbEntity
 import com.tossdesu.bankcardinfo.data.network.ApiService
@@ -29,22 +27,19 @@ class CardsRepositoryImpl @Inject constructor(
 
     /**
      * Get all cardInfo bin numbers searched before from DB
-     * @return livedata Success|DatabaseException object of [Result] sealed class
+     * @return Success|DatabaseException object of [Result] sealed class
      */
-    override fun getSearchHistoryUseCase(): LiveData<Result<List<CardBin>>> {
-        return MediatorLiveData<Result<List<CardBin>>>().apply {
-            try {
-                addSource(cardBinsDao.getCardBins()) { cardBinDbEntitiesList ->
-                    val cardBinsList = cardBinDbEntitiesList.map { it.toCardBin() }
-                    value = Result.Success(cardBinsList)
-                }
-            } catch (e: Exception) {
-                Result.Exception(
-                    Cause.DatabaseException(
-                        e.message ?: "Database Error while getting search history"
-                    )
+    override suspend fun getSearchHistoryUseCase(): Result<List<CardBin>> {
+        return try {
+            val cardBinsDbEntitiesList = cardBinsDao.getCardBins()
+            val cardBinsList = cardBinsDbEntitiesList.map { it.toCardBin() }
+            Result.Success(cardBinsList)
+        } catch (e: Exception) {
+            Result.Exception(
+                Cause.DatabaseException(
+                    e.message ?: "Database Error while getting search history"
                 )
-            }
+            )
         }
     }
 

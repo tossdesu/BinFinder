@@ -1,56 +1,64 @@
 package com.tossdesu.bankcardinfo.presentation
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.os.Build.VERSION
 import android.os.Bundle
-import android.view.MenuItem
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.tossdesu.bankcardinfo.R
-import com.tossdesu.bankcardinfo.databinding.ActivityBinInfoBinding
+import com.tossdesu.bankcardinfo.databinding.FragmentCardInfoBinding
 import com.tossdesu.bankcardinfo.domain.entity.CardInfo
 
-class CardInfoActivity : AppCompatActivity() {
+class CardInfoFragment : Fragment() {
 
-    private val binding by lazy {
-        ActivityBinInfoBinding.inflate(layoutInflater)
-    }
+    private var _binding: FragmentCardInfoBinding? = null
+    private val binding: FragmentCardInfoBinding
+        get() = _binding ?: throw RuntimeException("FragmentCardInfoBinding = null")
 
     private lateinit var binString: String
     private lateinit var cardInfo: CardInfo
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentCardInfoBinding.inflate(layoutInflater, container, false)
+        return binding.root
+    }
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setTitle(R.string.card_info_activity_label)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        parsIntent()
+        parsArgs()
         bindViews()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
-    private fun parsIntent() {
-        if (!intent.hasExtra(EXTRA_BIN_NUMBER))
+    private fun parsArgs() {
+        val args = requireArguments()
+        args.containsKey(EXTRA_BIN_NUMBER)
+        if (!args.containsKey(EXTRA_BIN_NUMBER))
             throw RuntimeException("EXTRA_BIN_NUMBER param is absent")
-        if (!intent.hasExtra(EXTRA_CARD))
+        if (!args.containsKey(EXTRA_CARD))
             throw RuntimeException("EXTRA_CARD param is absent")
 
-        binString = intent.getStringExtra(EXTRA_BIN_NUMBER).toString()
-        cardInfo = intent.getParcelableExtra(EXTRA_CARD)
-            ?: throw RuntimeException("CardInfo contains null")
+        binString = args.getString(EXTRA_BIN_NUMBER).toString()
+        cardInfo = (if (VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            args.getParcelable(EXTRA_CARD, CardInfo::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            args.getParcelable<CardInfo>(EXTRA_CARD)
+        }) ?: throw RuntimeException("CardInfo contains null")
     }
 
     private fun bindViews() {
@@ -118,7 +126,7 @@ class CardInfoActivity : AppCompatActivity() {
     }
 
     private fun setClickableTextColor(textView: TextView) {
-        textView.setTextColor(ContextCompat.getColor(this, R.color.blue_500))
+        textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.blue_500))
     }
 
     companion object {
@@ -128,11 +136,12 @@ class CardInfoActivity : AppCompatActivity() {
         private const val EXTRA_CARD = "extra_card"
         private const val EXTRA_BIN_NUMBER = "extra_bin_number"
 
-        fun newIntent(context: Context, bin: String, cardInfo: CardInfo): Intent {
-            return Intent(context, CardInfoActivity::class.java).apply {
-                putExtra(EXTRA_BIN_NUMBER, bin)
-                putExtra(EXTRA_CARD, cardInfo)
+        fun newInstance(bin: String, cardInfo: CardInfo) =
+            CardInfoFragment().apply {
+                arguments = Bundle().apply {
+                    putString(EXTRA_BIN_NUMBER, bin)
+                    putParcelable(EXTRA_CARD, cardInfo)
+                }
             }
-        }
     }
 }

@@ -1,6 +1,5 @@
 package com.tossdesu.bankcardinfo.data.database
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -17,8 +16,8 @@ interface CardBinsDao {
 
     /**
      * Get all card bins from DB
-     * @return livedata list of [CardBinDbEntity] objects
+     * @return list of [CardBinDbEntity] objects
      */
     @Query("SELECT * FROM ${CardBinDbEntity.NAME} ORDER BY id DESC")
-    fun getCardBins(): LiveData<List<CardBinDbEntity>>
+    suspend fun getCardBins(): List<CardBinDbEntity>
 }

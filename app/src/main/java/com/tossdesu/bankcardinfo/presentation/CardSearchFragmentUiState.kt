@@ -2,7 +2,7 @@ package com.tossdesu.bankcardinfo.presentation
 
 import com.tossdesu.bankcardinfo.domain.entity.CardBin
 import com.tossdesu.bankcardinfo.domain.entity.CardInfo
-import com.tossdesu.bankcardinfo.presentation.MainActivityUiState.*
+import com.tossdesu.bankcardinfo.presentation.CardSearchFragmentUiState.*
 
 /**
  * Sealed class for observe MainActivity UI state
@@ -15,12 +15,12 @@ import com.tossdesu.bankcardinfo.presentation.MainActivityUiState.*
  * [FatalError] - showing alert dialog for HttpExceptions(except 404), Database Exceptions
  * and Unknown Exceptions
  */
-sealed class MainActivityUiState {
-    data class CardData(val cardInfo: CardInfo) : MainActivityUiState()
-    data class BinSearchHistoryData(val cardBins: List<CardBin>) : MainActivityUiState()
-    object Loading : MainActivityUiState()
-    data class Error(val messageStringResource: Int) : MainActivityUiState()
-    object NoConnectionError : MainActivityUiState()
-    object NothingFoundNotification : MainActivityUiState()
-    data class FatalError(val title: String, val message: String) : MainActivityUiState()
+sealed class CardSearchFragmentUiState {
+    data class CardData(val cardInfo: CardInfo) : CardSearchFragmentUiState()
+    data class BinSearchHistoryData(val cardBins: List<CardBin>) : CardSearchFragmentUiState()
+    object Loading : CardSearchFragmentUiState()
+    data class Error(val messageStringResource: Int) : CardSearchFragmentUiState()
+    object NoConnectionError : CardSearchFragmentUiState()
+    object NothingFoundNotification : CardSearchFragmentUiState()
+    data class FatalError(val title: String, val message: String) : CardSearchFragmentUiState()
 }

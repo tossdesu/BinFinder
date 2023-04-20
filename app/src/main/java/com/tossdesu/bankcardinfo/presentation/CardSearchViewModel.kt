@@ -1,6 +1,9 @@
 package com.tossdesu.bankcardinfo.presentation
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.tossdesu.bankcardinfo.domain.Result
 import com.tossdesu.bankcardinfo.domain.Result.Exception.Cause.*
 import com.tossdesu.bankcardinfo.domain.entity.CardBin
@@ -17,37 +20,26 @@ class CardSearchViewModel @Inject constructor(
     private val getSearchHistoryUseCase: GetSearchHistoryUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableLiveData<MainActivityUiState>()
-    val uiState: LiveData<MainActivityUiState>
+    private val _uiState = MutableLiveData<CardSearchFragmentUiState>()
+    val uiState: LiveData<CardSearchFragmentUiState>
         get() = _uiState
 
-    private val binsHistory by lazy {
-        getSearchHistoryUseCase()
-    }
+    private var searchJob: Job? = null
+    private var historyJob: Job? = null
 
-    private val binSearchUpdated by lazy {
-        Observer<Result<List<CardBin>>> { result ->
-             if (result is Result.Success) {
-                 _uiState.value = MainActivityUiState.BinSearchHistoryData(result.data)
+    fun getHistory() {
+        historyJob?.let {
+            if (it.isActive)
+                return
+        }
+        historyJob = viewModelScope.launch {
+            val result = getSearchHistoryUseCase()
+            if (result is Result.Success) {
+                _uiState.value = CardSearchFragmentUiState.BinSearchHistoryData(result.data)
             } else if (result is Result.Exception) {
                 handleException(result)
             }
         }
-    }
-
-    private var searchJob: Job? = null
-
-    init {
-        getHistory()
-    }
-
-    private fun getHistory() {
-        binsHistory.observeForever(binSearchUpdated)
-    }
-
-    override fun onCleared() {
-        binsHistory.removeObserver(binSearchUpdated)
-        super.onCleared()
     }
 
     fun getCardInfo(binString: String, isHistoryQuery: Boolean = false) {
@@ -57,18 +49,18 @@ class CardSearchViewModel @Inject constructor(
         }
         searchJob = viewModelScope.launch {
 
-            _uiState.value = MainActivityUiState.Loading
+            _uiState.value = CardSearchFragmentUiState.Loading
             val result = getCardUseCase(binString)
 
             if (result is Result.Success) {
-                _uiState.value = MainActivityUiState.CardData(result.data)
+                _uiState.value = CardSearchFragmentUiState.CardData(result.data)
                 if (!isHistoryQuery) {
                     saveCardBin(CardBin(bin = binString))
                 }
 
             // Business logic error handling
             } else if (result is Result.Error) {
-                _uiState.value = MainActivityUiState.Error(result.messageStringResource)
+                _uiState.value = CardSearchFragmentUiState.Error(result.messageStringResource)
 
             // Exceptions handling
             } else if (result is Result.Exception) {
@@ -86,25 +78,25 @@ class CardSearchViewModel @Inject constructor(
     private fun handleException(e: Result.Exception) {
         when (e.cause) {
             is NoConnection -> {
-                _uiState.value = MainActivityUiState.NoConnectionError
+                _uiState.value = CardSearchFragmentUiState.NoConnectionError
             }
             is HttpResponseNothingFound -> {
-                _uiState.value = MainActivityUiState.NothingFoundNotification
+                _uiState.value = CardSearchFragmentUiState.NothingFoundNotification
             }
             is HttpException -> {
-                _uiState.value = MainActivityUiState.FatalError(
+                _uiState.value = CardSearchFragmentUiState.FatalError(
                     "Network Error",
                     "Code: ${e.cause.code} \nMessage: ${e.cause.message}"
                 )
             }
             is DatabaseException -> {
-                _uiState.value = MainActivityUiState.FatalError(
+                _uiState.value = CardSearchFragmentUiState.FatalError(
                     "Database Error",
                     e.cause.message
                 )
             }
             is Unknown -> {
-                _uiState.value = MainActivityUiState.FatalError(
+                _uiState.value = CardSearchFragmentUiState.FatalError(
                     "Unknown Error",
                     e.cause.message
                 )
